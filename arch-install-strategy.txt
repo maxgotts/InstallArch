@@ -25,7 +25,7 @@ $ parted /dev/vda
 . mktable gpt
 . mkpart primary fat32 1MiB 261MiB
 . set 1 esp on
-. mkpart primary ext4 216MiB 100%
+. mkpart primary ext4 261MiB 100%
 . quit
 	make the partition table, generate two partitions
 	using UEFI/GPT
