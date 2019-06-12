@@ -1,11 +1,11 @@
-#Install Archlinux onto a USB key using QEMU
+Install Archlinux onto a USB key using QEMU
 
-##Download the image
+Download the image
 
 Download a mirror from https://www.archlinux.org/download/
 Save it to $HOME
 
-##Launch the VM
+Launch the VM
 
 $ diskutil list
 	to find out where the USB key is on the system
@@ -15,7 +15,7 @@ $ diskutil unmount /dev/disk2
 $ sudo qemu-system-x86_64 -m 1024 -boot d -smp 3 -net nic -net user -hda arch.img -cdrom archlinux-XXXXXX.iso -drive file=/dev/disk2,format=raw,cache=none,if=virtio
 	open the QEMU VM using the ISO by the name of the file downloaded to $HOME
 
-##Bootstrap Arch
+Bootstrap Arch
 
 $ fdisk -l
 	figure out where the device is located
@@ -35,7 +35,7 @@ $ mkfs.ext4 /dev/vda2
 	initialise proper ext4 filesystem on the root
 $ mount /dev/vda2 /mnt
 	mount the root
-$ mkfs.fat -F32 /dev/vda1
+$ mkfs.fat-F32/dev/vda1
 	initialise the proper FAT32 filesystem on the ESP
 $ mkdir /mnt/efi
 	create the mount point for the ESP
@@ -50,7 +50,7 @@ $ pacstrap /mnt base base-devel
 	handle errors
         * If you get a key-signing issue: “Signature from Andreas Radke […] is invalid […] Errors occurred, no packages were upgraded,” try pacman-key --refresh-keys and re-run the pacstrap command
 
-##Configure Arch
+Configure Arch
 
 $ genfstab -U /mnt >> /mnt/etc/fstab
 	generate fstab, which is used to disk partitions mount onto the filesystem
@@ -80,7 +80,7 @@ $ vi /etc/hosts
 $ passwd
 	set the password
 
-##Install & Configure GRUB2
+Install & Configure GRUB2
 
 $ pacman -S grub efibootmgr
 	install grub, which is a package that helps install GRUB2, and efibootmgr, which is used by the GRUB installation script to write to NVRAM
@@ -89,18 +89,27 @@ $ grub-install --target=x86_64-efi --efi-directory=/efi --bootloader-id=GRUB
 $ grub-mkconfig -o /boot/grub/grub.cfg
 	make the config file for GRUB2
 
-##Boot Arch
+Bless EFI
 
 $ exit
 [ $ umount -R /mnt ]
 	unmount all partitions
 Exit into Terminal and ^C to stop QEMU
+$ mkdir ~/efi
+	create the new mount point ~/efi
+$ sudo mount -w -t msdos /dev/disk2s1 ~/efi
+	mount the EFI System partition onto the new mount point ~/efi
+$ bless --folder ~/efi/EFI/GRUB --file ~/efi/EFI/GRUB/grubx64.efi
+	bless the EFI System partition to make it bootable
+
+Boot Arch
+
 $ reboot
 	hold Alt whilst the computer reboots
+Click on Arch and hit enter
 
 
-
-#Bibliography
+Bibliography
 * https://wiki.archlinux.org/index.php/EFI_system_partition
 * https://wiki.archlinux.org/index.php/Parted#UEFI/GPT_examples
 * https://wiki.archlinux.org/index.php/Installation_guide
@@ -110,3 +119,4 @@ $ reboot
 * https://wiki.archlinux.org/index.php/Help:Reading#Installation_of_packages
 * https://wiki.archlinux.org/index.php/GRUB#Generate_the_main_configuration_file
 * https://wiki.archlinux.org/index.php/Unified_Extensible_Firmware_Interface#UEFI_variables
+* https://bombich.com/kb/ccc4/what-makes-volume-bootable (bootability)
