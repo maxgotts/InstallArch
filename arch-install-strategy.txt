@@ -35,7 +35,7 @@ $ mkfs.ext4 /dev/vda2
 	initialise proper ext4 filesystem on the root
 $ mount /dev/vda2 /mnt
 	mount the root
-$ mkfs.fat-F32/dev/vda1
+$ mkfs.fat -F32 /dev/vda1
 	initialise the proper FAT32 filesystem on the ESP
 $ mkdir /mnt/efi
 	create the mount point for the ESP
