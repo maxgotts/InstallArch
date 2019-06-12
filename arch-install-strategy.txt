@@ -17,82 +17,87 @@ $ sudo qemu-system-x86_64 -m 1024 -boot d -smp 3 -net nic -net user -hda arch.im
 
 Bootstrap Arch
 
-$ fdisk -l
+We are now in the QEMU VM, and will continue to be until the octothorps (#) become dollar signs ($)
+
+# fdisk -l
 	figure out where the device is located
 	in this example, we assume it is located at vda
 
-$ parted /dev/vda
+# parted /dev/vda
 . mktable gpt
 . mkpart primary fat32 1MiB 261MiB
 . set 1 esp on
 . mkpart primary ext4 261MiB 100%
 . quit
-	make the partition table, generate two partitions
-	using UEFI/GPT
-[ $ parted /dev/vda print ]
+	make the partition table, generate two partitions of filesystem FAT32 (260MiB) and ext4 (the rest) on a GPT partition table
+	each line after parted should begin with (parted) but to avoid confusion we write this just as “.”
+[ # parted /dev/vda print ]
 	test to see if everything is good
-$ mkfs.ext4 /dev/vda2
+# mkfs.ext4 /dev/vda2
 	initialise proper ext4 filesystem on the root
-$ mount /dev/vda2 /mnt
+# mount /dev/vda2 /mnt
 	mount the root
-$ mkfs.fat-F32/dev/vda1
+# mkfs.fat-F32/dev/vda1
 	initialise the proper FAT32 filesystem on the ESP
-$ mkdir /mnt/efi
+# mkdir /mnt/efi
 	create the mount point for the ESP
-$ mount /dev/vda1 /mnt/efi
+# mount /dev/vda1 /mnt/efi
 	mount the ESP
-[ $ vi /etc/pacman.d/mirrorlist
+[ # vi /etc/pacman.d/mirrorlist
 	move different URLs around based on geographical location ]
 	for better response times
 	automatically generated as well, but rectification sometimes required
-$ pacstrap /mnt base base-devel
+# pacstrap /mnt base base-devel
 	pacstrap the base and base-devel packages
 	handle errors
         * If you get a key-signing issue: “Signature from Andreas Radke […] is invalid […] Errors occurred, no packages were upgraded,” try pacman-key --refresh-keys and re-run the pacstrap command
 
 Configure Arch
 
-$ genfstab -U /mnt >> /mnt/etc/fstab
+# genfstab -U /mnt >> /mnt/etc/fstab
 	generate fstab, which is used to disk partitions mount onto the filesystem
 	optionally check the resultant output if you can understand it
-$ arch-chroot /mnt
+# arch-chroot /mnt
 	temporarily set the mounted disk as the root
-$ ln -sf /usr/share/zoneinfo/America/Los_Angeles /etc/localtime
+	all commands after this will not actually begin with an octothorp (#), however we will represent them as such
+# ln -sf /usr/share/zoneinfo/America/Los_Angeles /etc/localtime
 	Set timezone to local time (change as necessary)
-$ hwclock --systohc
+# hwclock --systohc
 	generate /etc/adjtime (specifics aren’t important, you’re dealing with time)
-$ vi /etc/locale.gen
+# vi /etc/locale.gen
 	uncomment necessary lines (e.g. en_US.UTF-8 UTF-8, bi_VS UTF-8, en_GB.UTF-8 UTF-8, es_CR.UTF-8 UTF-8)
-$ locale-gen
-[ $ locale -a ]
+# locale-gen
+	regenerate the locale (“write out” the previous file into use)
+[ # locale -a ]
 	check to see if everything is as it should be
-$ echo “LANG=en_US.UTF-8” > /etc/locale.conf
+# echo “LANG=en_US.UTF-8” > /etc/locale.conf
 	set language
-$ echo “archenemy-beta” > /etc/hostname
+# echo “archenemy-beta” > /etc/hostname
 	set your hostname—we will assume archenemy-beta as a hostname
 	this is what will appear on servers and such
-$ vi /etc/hosts
+# vi /etc/hosts
 	write the following:
 127.0.0.1	localhost
 ::1		localhost
 127.0.1.1	archenemy-beta.localdomain		archenemy-beta
 	change 127.0.0.1 to the permanent IP if it exists
-$ passwd
+# passwd
 	set the password
 
 Install & Configure GRUB2
 
-$ pacman -S grub efibootmgr
+# pacman -S grub efibootmgr
 	install grub, which is a package that helps install GRUB2, and efibootmgr, which is used by the GRUB installation script to write to NVRAM
-$ grub-install --target=x86_64-efi --efi-directory=/efi --bootloader-id=GRUB
+# grub-install --target=x86_64-efi --efi-directory=/efi --bootloader-id=GRUB
 	this actually installs GRUB2 and all necessary packages
-$ grub-mkconfig -o /boot/grub/grub.cfg
+# grub-mkconfig -o /boot/grub/grub.cfg
 	make the config file for GRUB2
 
 Bless EFI
 
-$ exit
-[ $ umount -R /mnt ]
+# exit
+	exit from the arch-chroot
+[ # umount -R /mnt ]
 	unmount all partitions
 Exit into Terminal and ^C to stop QEMU
 $ mkdir ~/efi
@@ -120,3 +125,4 @@ Bibliography
 * https://wiki.archlinux.org/index.php/GRUB#Generate_the_main_configuration_file
 * https://wiki.archlinux.org/index.php/Unified_Extensible_Firmware_Interface#UEFI_variables
 * https://bombich.com/kb/ccc4/what-makes-volume-bootable (bootability)
+
