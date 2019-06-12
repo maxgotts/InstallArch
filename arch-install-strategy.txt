@@ -109,3 +109,4 @@ $ reboot
 * https://wiki.archlinux.org/index.php/EFI_system_partition#Check_for_an_existing_partition
 * https://wiki.archlinux.org/index.php/Help:Reading#Installation_of_packages
 * https://wiki.archlinux.org/index.php/GRUB#Generate_the_main_configuration_file
+* https://wiki.archlinux.org/index.php/Unified_Extensible_Firmware_Interface#UEFI_variables
