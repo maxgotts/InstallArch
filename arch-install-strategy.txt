@@ -125,4 +125,8 @@ Bibliography
 * https://wiki.archlinux.org/index.php/GRUB#Generate_the_main_configuration_file
 * https://wiki.archlinux.org/index.php/Unified_Extensible_Firmware_Interface#UEFI_variables
 * https://bombich.com/kb/ccc4/what-makes-volume-bootable (bootability)
+* https://wiki.archlinux.org/index.php/Unified_Extensible_Firmware_Interface#Mount_efivarfs
+* https://wiki.archlinux.org/index.php/Unified_Extensible_Firmware_Interface#Mount_efivarfs
+* https://unix.stackexchange.com/questions/91620/efi-variables-are-not-supported-on-this-system (efivars)
+* https://wiki.gentoo.org/wiki/EFI_stub_kernel
 
