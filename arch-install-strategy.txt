@@ -2,7 +2,9 @@ Install Archlinux onto a USB key using QEMU
 
 Download the image
 
-Download a mirror from https://www.archlinux.org/download/
+Download a mirror from https://www.archlinux.org/download/ and name it archlinux-XXXXXX.iso
+Convert the ISO to an image and name it arch.img
+
 Save it to $HOME
 
 Launch the VM
@@ -14,6 +16,11 @@ $ diskutil unmount /dev/disk2
 	unmount the device so it is not busy when QEMU uses it
 $ sudo qemu-system-x86_64 -m 1024 -boot d -smp 3 -net nic -net user -hda arch.img -cdrom archlinux-XXXXXX.iso -drive file=/dev/disk2,format=raw,cache=none,if=virtio
 	open the QEMU VM using the ISO by the name of the file downloaded to $HOME
+# loadkeys keymapping
+	load a key mapping (keymapping) that you want to use for QEMU
+	# loadkeys -d gives you the default if you mess up
+	# ls /usr/share/kbd/keymaps/**/*.map.gz lists the key mappings
+	I recommend defkeymap
 
 Bootstrap Arch
 
@@ -56,9 +63,9 @@ Configure Arch
 
 # genfstab -U /mnt >> /mnt/etc/fstab
 	generate fstab, which is used to disk partitions mount onto the filesystem
-	optionally check the resultant output if you can understand it
+	don’t bother checking the output — it uses QEMU’s UUID’s which are wrong, we will fix this later
 # arch-chroot /mnt
-	temporarily set the mounted disk as the root
+	treat mounted partition (the ext4 that will become the Arch partition) as the root
 	all commands after this will not actually begin with an octothorp (#), however we will represent them as such
 # ln -sf /usr/share/zoneinfo/America/Los_Angeles /etc/localtime
 	Set timezone to local time (change as necessary)
@@ -72,6 +79,7 @@ Configure Arch
 	check to see if everything is as it should be
 # echo “LANG=en_US.UTF-8” > /etc/locale.conf
 	set language
+# echo “KEYMAP=defkeymap” > /etc/vconsole.conf
 # echo “archenemy-beta” > /etc/hostname
 	set your hostname—we will assume archenemy-beta as a hostname
 	this is what will appear on servers and such
@@ -107,11 +115,17 @@ $ sudo mount -w -t msdos /dev/disk2s1 ~/efi
 $ bless --folder ~/efi/EFI/GRUB --file ~/efi/EFI/GRUB/grubx64.efi
 	bless the EFI System partition to make it bootable
 
-Boot Arch
+Boot Arch to Rectify FSTAB
 
 $ reboot
 	hold Alt whilst the computer reboots
-Click on Arch and hit enter
+Click on EFI System and hit enter, select Arch and hit enter
+When the rescue shell appears
+$ mount /dev/vda2 /mnt
+$ lsblk -f
+	get the UUID’s of the various partitions
+$ vi /mnt/etc/fstab
+	change the wrong UUID’s to the ones above
 
 
 Bibliography
@@ -129,4 +143,7 @@ Bibliography
 * https://wiki.archlinux.org/index.php/Unified_Extensible_Firmware_Interface#Mount_efivarfs
 * https://unix.stackexchange.com/questions/91620/efi-variables-are-not-supported-on-this-system (efivars)
 * https://wiki.gentoo.org/wiki/EFI_stub_kernel
+* https://wiki.archlinux.org/index.php/Fstab
+* https://wiki.archlinux.org/index.php/Persistent_block_device_naming
+* https://wiki.archlinux.org/index.php/Systemd
 
