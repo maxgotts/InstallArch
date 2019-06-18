@@ -27,7 +27,10 @@
 \f1\b0 \cf2 Download a mirror from {\field{\*\fldinst{HYPERLINK "https://www.archlinux.org/download/"}}{\fldrslt \cf3 \ul \ulc3 https://www.archlinux.org/download/}}
 \f0\b  
 \f1\b0 and name it 
-\f0\b archlinux-XXXXXX.iso
+\f0\b archlinux-XXXXXX.iso\
+
+\f1\b0 Extract the image from the ISO and save it as 
+\f0\b arch.img
 \f1\b0 \cf4 \ul \ulc4 \
 \cf2 \ulnone Convert the ISO to an image and name it arch.img\cf4 \ul \
 \pard\pardeftab560\slleading20\partightenfactor0
@@ -106,6 +109,8 @@ We are now in the QEMU VM, and will continue to be until the octothorps (#) beco
 
 \f1\b0 \cf2 . 
 \f0\b mkpart primary ext4 261MiB 100%\
+. name 1 \'91MyEFI\'92\
+. name 2 \'91archenemy-beta\'92\
 
 \f1\b0 . 
 \f0\b quit
@@ -189,42 +194,41 @@ We are now in the QEMU VM, and will continue to be until the octothorps (#) beco
 \f0\b arch-chroot /mnt\
 
 \f1\b0 	treat mounted partition (the ext4 that will become the Arch partition) as the root\
-	all commands after this will not actually begin with an octothorp (#), however we will represent them as such\
-# 
+[]# 
 \f0\b ln -sf /usr/share/zoneinfo/America/Los_Angeles /etc/localtime
 \f1\b0 \
 	Set timezone to local time (change as necessary)\
-# 
+[]# 
 \f0\b hwclock --systohc
 \f1\b0 \
 	generate /etc/adjtime (specifics aren\'92t important, you\'92re dealing with time)\
-# 
+[]# 
 \f0\b vi /etc/locale.gen\
 
 \f1\b0 	uncomment necessary lines (e.g. en_US.UTF-8 UTF-8, bi_VS UTF-8, en_GB.UTF-8 UTF-8, es_CR.UTF-8 UTF-8)\
-# 
+[]# 
 \f0\b locale-gen\
 
 \f1\b0 	regenerate the locale (\'93write out\'94 the previous file into use)
 \f0\b \
 
-\f1\b0 [ # 
+\f1\b0 [ []# 
 \f0\b locale -a
 \f1\b0  ]\
 	check to see if everything is as it should be\
-#
+[]#
 \f0\b  echo \'93LANG=en_US.UTF-8\'94 > /etc/locale.conf\
 	
 \f1\b0 set language\
-# 
+[]# 
 \f0\b echo \'93KEYMAP=defkeymap\'94 > /etc/vconsole.conf
 \f1\b0 \
-# 
+[]# 
 \f0\b echo \'93archenemy-beta\'94 > /etc/hostname\
 
 \f1\b0 	set your hostname\'97we will assume archenemy-beta as a hostname\
 	this is what will appear on servers and such\
-# 
+[]# 
 \f0\b vi /etc/hosts
 \f1\b0 \
 	write the following:\
@@ -232,7 +236,7 @@ We are now in the QEMU VM, and will continue to be until the octothorps (#) beco
 ::1		localhost\
 127.0.1.1	archenemy-beta.localdomain		archenemy-beta\
 	change 127.0.0.1 to the permanent IP if it exists\
-# 
+[]# 
 \f0\b passwd
 \f1\b0 \
 
@@ -245,7 +249,7 @@ Install & Configure GRUB2\
 \pard\pardeftab560\slleading20\partightenfactor0
 
 \f1\b0\fs24 \cf2 \ulnone \
-# 
+[]# 
 \f0\b pacman -S grub efibootmgr\
 
 \f1\b0 	install 
@@ -253,11 +257,11 @@ Install & Configure GRUB2\
 \f1\b0 , which is a package that helps install GRUB2, and 
 \f0\b efibootmgr
 \f1\b0 , which is used by the GRUB installation script to write to NVRAM\
-# 
+[]# 
 \f0\b grub-install --target=x86_64-efi --efi-directory=/efi --bootloader-id=GRUB\
 
 \f1\b0 	this actually installs GRUB2 and all necessary packages\
-# 
+[]# 
 \f0\b grub-mkconfig -o /boot/grub/grub.cfg\
 
 \f1\b0 	make the config file for GRUB2\
@@ -268,7 +272,7 @@ Install & Configure GRUB2\
 \pard\pardeftab560\slleading20\partightenfactor0
 
 \f1\b0\fs24 \cf2 \ulnone \
-# 
+[]# 
 \f0\b exit\
 
 \f1\b0 	exit from the arch-chroot
@@ -443,6 +447,16 @@ If the keyboard doesn\'92t work, test (in QEMU, after mounting twice and arch-ch
 \f2\fs20 {\listtext	\uc0\u8226 	}{\field{\*\fldinst{HYPERLINK "https://wiki.archlinux.org/index.php/Linux_console/Keyboard_configuration#Viewing_keyboard_settings"}}{\fldrslt 
 \f1\fs24 \cf3 \ul \ulc3 https://wiki.archlinux.org/index.php/Linux_console/Keyboard_configuration#Viewing_keyboard_settings}}
 \f1\fs24 \ul \
-\pard\pardeftab560\slleading20\partightenfactor0
-\cf2 \ulnone \
+\ls2\ilvl0
+\f2\fs20 \ulnone {\listtext	\uc0\u8226 	}{\field{\*\fldinst{HYPERLINK "https://unix.stackexchange.com/questions/137862/why-does-fstab-use-uuid-instead-of-the-actual-file-system-name"}}{\fldrslt 
+\f1\fs24 \cf3 \ul \ulc3 https://unix.stackexchange.com/questions/137862/why-does-fstab-use-uuid-instead-of-the-actual-file-system-name}}
+\f1\fs24  (modifying FSTAB to use non persistent device block naming conventions)\ul \
+\ls2\ilvl0
+\f2\fs20 \ulnone {\listtext	\uc0\u8226 	}{\field{\*\fldinst{HYPERLINK "https://unix.stackexchange.com/questions/524807/installing-arch-onto-a-usb-key-from-qemu-emulation-but-all-efivar-files-missing"}}{\fldrslt 
+\f1\fs24 \cf3 \ul \ulc3 https://unix.stackexchange.com/questions/524807/installing-arch-onto-a-usb-key-from-qemu-emulation-but-all-efivar-files-missing}}
+\f1\fs24  (my question ESP not bootable after bless)\
+\ls2\ilvl0
+\f2\fs20 {\listtext	\uc0\u8226 	}{\field{\*\fldinst{HYPERLINK "https://unix.stackexchange.com/questions/525538/dropped-into-arch-emergency-shell-incorrect-fstab-causes-mounting-issues-keybonoredirect=1&lq=1"}}{\fldrslt 
+\f1\fs24 \cf3 \ul \ulc3 https://unix.stackexchange.com/questions/525538/dropped-into-arch-emergency-shell-incorrect-fstab-causes-mounting-issues-keybonoredirect=1&lq=1}}
+\f1\fs24  (my question emergency shell)\ul \
 }
