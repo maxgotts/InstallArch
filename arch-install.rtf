@@ -109,7 +109,7 @@ We are now in the QEMU VM, and will continue to be until the octothorps (#) beco
 
 \f1\b0 \cf2 . 
 \f0\b mkpart primary ext4 261MiB 100%\
-. name 1 \'91MyEFI\'92\
+. name 1 \'91the-efi-partition\'92\
 . name 2 \'91archenemy-beta\'92\
 
 \f1\b0 . 
@@ -189,7 +189,15 @@ We are now in the QEMU VM, and will continue to be until the octothorps (#) beco
 \f0\b genfstab -U /mnt >> /mnt/etc/fstab\
 
 \f1\b0 	generate fstab, which is used to disk partitions mount onto the filesystem\
-	don\'92t bother checking the output \'97 it uses QEMU\'92s UUID\'92s which are wrong, we will fix this later\
+	don\'92t bother checking the output \'97 it uses QEMU\'92s UUID\'92s which are wrong, we will fix this\
+# 
+\f0\b vi /mnt/etc/fstab\
+
+\f1\b0 	change the \'93UUID=XXXX-XXX\'94 parts to, respectively, 
+\f0\b /dev/gpt/archenemy-beta
+\f1\b0  and 
+\f0\b /dev/gpt/the-efi-partition
+\f1\b0 \
 # 
 \f0\b arch-chroot /mnt\
 
@@ -458,5 +466,11 @@ If the keyboard doesn\'92t work, test (in QEMU, after mounting twice and arch-ch
 \ls2\ilvl0
 \f2\fs20 {\listtext	\uc0\u8226 	}{\field{\*\fldinst{HYPERLINK "https://unix.stackexchange.com/questions/525538/dropped-into-arch-emergency-shell-incorrect-fstab-causes-mounting-issues-keybonoredirect=1&lq=1"}}{\fldrslt 
 \f1\fs24 \cf3 \ul \ulc3 https://unix.stackexchange.com/questions/525538/dropped-into-arch-emergency-shell-incorrect-fstab-causes-mounting-issues-keybonoredirect=1&lq=1}}
-\f1\fs24  (my question emergency shell)\ul \
-}
+\f1\fs24  (my question emergency shell)\
+\ls2\ilvl0
+\f2\fs20 {\listtext	\uc0\u8226 	}{\field{\*\fldinst{HYPERLINK "https://serverfault.com/questions/468785/is-it-safe-to-change-the-name-of-a-partition-in-a-gpt-table-using-parted"}}{\fldrslt 
+\f1\fs24 \cf3 \ul \ulc3 https://serverfault.com/questions/468785/is-it-safe-to-change-the-name-of-a-partition-in-a-gpt-table-using-parted}}
+\f1\fs24  (naming using parted)\
+\ls2\ilvl0
+\f2\fs20 {\listtext	\uc0\u8226 	}{\field{\*\fldinst{HYPERLINK "https://www.tecmint.com/change-modify-linux-disk-partition-label-names/"}}{\fldrslt 
+\f1\fs24 \cf3 \ul \ulc3 https://www.tecmint.com/change-modify-linux-disk-partition-label-names/}}}
