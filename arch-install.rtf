@@ -29,14 +29,17 @@
 \f1\b0 and name it 
 \f0\b archlinux-XXXXXX.iso\
 
-\f1\b0 Extract the image from the ISO and save it as 
-\f0\b arch.img
+\f1\b0 $ 
+\f0\b hdiutil convert -format UDRW -o ~/arch ~/archlinux-2019.06.01-x86_64.iso
 \f1\b0 \cf4 \ul \ulc4 \
-\cf2 \ulnone Convert the ISO to an image and name it arch.img\cf4 \ul \
-\pard\pardeftab560\slleading20\partightenfactor0
-\cf2 \ulc2 \
-\pard\pardeftab560\slleading20\partightenfactor0
-\cf2 \ulnone Save it to $HOME
+\cf2 \ulnone 	convert the ISO to an DMG and name it 
+\f0\b arch.dmg
+\f1\b0 \
+$ 
+\f0\b hdiutil convert arch.dmg -format RdWr -o arch.img\
+
+\f1\b0 	convert the DMG to an IMG\ul \ulc2 \
+\ulnone Save it to $HOME
 \fs28 \
 \
 \pard\pardeftab560\slleading20\partightenfactor0
@@ -54,6 +57,7 @@ $
 \f0\b diskutil unmount /dev/disk2
 \f1\b0 \
 	unmount the device so it is not busy when QEMU uses it\
+	you only need to do this the first time, once arch is bootstrapped (fully installed with all dependencies) it no longer automatically mounts\
 $ 
 \f0\b sudo qemu-system-x86_64 -m 1024 -boot d -smp 3 -net nic -net user -hda arch.img -cdrom archlinux-XXXXXX.iso -drive file=/dev/disk2,format=raw,cache=none,if=virtio\
 
@@ -62,7 +66,7 @@ $
 \f0\b -net nic
 \f1\b0  means \'93use default network\'94\
 		\
-We are now in the QEMU VM, and will continue to be until the octothorps (#) become dollar signs ($)\
+We are now in the QEMU VM, and will continue to be until the octothorps (#) become dollar signs ($) again\
 # 
 \f0\b loadkeys
 \f1\b0  
@@ -132,10 +136,6 @@ We are now in the QEMU VM, and will continue to be until the octothorps (#) beco
 
 \fs24 	initialise proper ext4 filesystem on the root\
 # 
-\f0\b mount /dev/vda2 /mnt
-\f1\b0 \
-	mount the root\
-# 
 \f0\b mkfs.fat -F32 /dev/vda1
 \f1\b0 \
 	initialise the proper FAT32 filesystem on the ESP\
@@ -146,6 +146,10 @@ We are now in the QEMU VM, and will continue to be until the octothorps (#) beco
 \pard\pardeftab560\slleading20\partightenfactor0
 
 \f1\b0\fs24 \cf2 \ulnone \
+# 
+\f0\b mount /dev/vda2 /mnt
+\f1\b0 \
+	mount the root\
 # 
 \f0\b mkdir /mnt/efi
 \f1\b0 \
@@ -173,7 +177,7 @@ We are now in the QEMU VM, and will continue to be until the octothorps (#) beco
 \ls1\ilvl2
 \f2\fs20 \cf2 {\listtext	\uc0\u8226 	}
 \f1\fs24 If you get a key-signing issue: \'93Signature from Andreas Radke [\'85] is invalid [\'85] Errors occurred, no packages were upgraded,\'94 try 
-\f0\b pacman-key --refresh-keys
+\f0\b pacman-key --init, pacman-key --populate archlinux
 \f1\b0  and re-run the 
 \f0\b pacstrap
 \f1\b0  command\
@@ -194,9 +198,9 @@ We are now in the QEMU VM, and will continue to be until the octothorps (#) beco
 \f0\b vi /mnt/etc/fstab\
 
 \f1\b0 	change the \'93UUID=XXXX-XXX\'94 parts to, respectively, 
-\f0\b /dev/gpt/archenemy-beta
+\f0\b /dev/disk/by-partlabel/archenemy-beta
 \f1\b0  and 
-\f0\b /dev/gpt/the-efi-partition
+\f0\b /dev/disk/by-partlabel/the-efi-partition
 \f1\b0 \
 # 
 \f0\b arch-chroot /mnt\
@@ -229,7 +233,7 @@ We are now in the QEMU VM, and will continue to be until the octothorps (#) beco
 	
 \f1\b0 set language\
 []# 
-\f0\b echo \'93KEYMAP=defkeymap\'94 > /etc/vconsole.conf
+\f0\b echo \'93KEYMAP=us\'94 > /etc/vconsole.conf
 \f1\b0 \
 []# 
 \f0\b echo \'93archenemy-beta\'94 > /etc/hostname\
@@ -265,6 +269,10 @@ Install & Configure GRUB2\
 \f1\b0 , which is a package that helps install GRUB2, and 
 \f0\b efibootmgr
 \f1\b0 , which is used by the GRUB installation script to write to NVRAM\
+[]# 
+\f0\b mkdir /boot/grub
+\f1\b0 \
+	make the grub directory\
 []# 
 \f0\b grub-install --target=x86_64-efi --efi-directory=/efi --bootloader-id=GRUB\
 
@@ -307,6 +315,10 @@ $
 \f0\b bless --folder ~/efi/EFI/GRUB --file ~/efi/EFI/GRUB/grubx64.efi\
 
 \f1\b0 	bless the EFI System partition to make it bootable\
+[ $ 
+\f0\b rm -rf ~/efi
+\f1\b0  ]\
+	optionally delete the folder\
 \
 \pard\pardeftab560\slleading20\partightenfactor0
 
@@ -371,6 +383,12 @@ If the keyboard doesn\'92t work, test (in QEMU, after mounting twice and arch-ch
 \f1\b0 \cf2 		for your 
 \f0\b keymap
 \f1\b0 \
+\uc0\u8232 \
+
+\f0\b udevadm info -n /dev/vda2\
+/dev/disk/by-partlabel/zephyr-alpha
+\f1\b0 \
+\
 \
 \pard\pardeftab560\slleading20\pardirnatural\partightenfactor0
 \cf2 \
@@ -468,9 +486,24 @@ If the keyboard doesn\'92t work, test (in QEMU, after mounting twice and arch-ch
 \f1\fs24 \cf3 \ul \ulc3 https://unix.stackexchange.com/questions/525538/dropped-into-arch-emergency-shell-incorrect-fstab-causes-mounting-issues-keybonoredirect=1&lq=1}}
 \f1\fs24  (my question emergency shell)\
 \ls2\ilvl0
+\f2\fs20 {\listtext	\uc0\u8226 	}{\field{\*\fldinst{HYPERLINK "https://www.reddit.com/r/archlinux/comments/76zuyi/cant_boot_and_cant_type_in_emergency_shell/"}}{\fldrslt 
+\f1\fs24 \cf3 \ul \ulc3 https://www.reddit.com/r/archlinux/comments/76zuyi/cant_boot_and_cant_type_in_emergency_shell/}}
+\f1\fs24  (similar problem)\
+\ls2\ilvl0
 \f2\fs20 {\listtext	\uc0\u8226 	}{\field{\*\fldinst{HYPERLINK "https://serverfault.com/questions/468785/is-it-safe-to-change-the-name-of-a-partition-in-a-gpt-table-using-parted"}}{\fldrslt 
 \f1\fs24 \cf3 \ul \ulc3 https://serverfault.com/questions/468785/is-it-safe-to-change-the-name-of-a-partition-in-a-gpt-table-using-parted}}
 \f1\fs24  (naming using parted)\
 \ls2\ilvl0
 \f2\fs20 {\listtext	\uc0\u8226 	}{\field{\*\fldinst{HYPERLINK "https://www.tecmint.com/change-modify-linux-disk-partition-label-names/"}}{\fldrslt 
-\f1\fs24 \cf3 \ul \ulc3 https://www.tecmint.com/change-modify-linux-disk-partition-label-names/}}}
+\f1\fs24 \cf3 \ul \ulc3 https://www.tecmint.com/change-modify-linux-disk-partition-label-names/}}
+\f1\fs22  (partition label names)
+\fs24 \ul \
+\ls2\ilvl0
+\f2\fs20 \ulnone {\listtext	\uc0\u8226 	}{\field{\*\fldinst{HYPERLINK "https://wiki.archlinux.org/index.php/Udev#Setting_static_device_names"}}{\fldrslt 
+\f1\fs24 \cf3 \ul \ulc3 https://wiki.archlinux.org/index.php/Udev#Setting_static_device_names}}
+\f1\fs24 \cf4  
+\fs22 \cf2 (tools for getting paths by-partlabel)
+\fs24 \ul \
+\pard\pardeftab560\slleading20\partightenfactor0
+\cf2 \ulnone \
+}
